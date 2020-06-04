@@ -111,6 +111,30 @@ public class GGsync {
 			Date syncStartDateUtc = ggsyncProperties.getSyncStartDateUtc();
 			Date syncEndDateUtc = ggsyncProperties.getSyncEndDateUtc();
 			Integer garoonMemberLimit = ggsyncProperties.getGaroonMemberLimit();
+			MemberType garoonCalendarType = MemberType.USER;
+			String garoonCalendarStr = "";
+			int garoonCalendarId = ggsyncProperties.getGaroonCalendarId();
+
+			switch (ggsyncProperties.getGaroonCalendarType()) {
+				case "facility":
+					garoonCalendarType = MemberType.FACILITY;
+					garoonCalendarStr = "施設";
+					break;
+
+				case "group":
+					garoonCalendarType = MemberType.ORGANIZATION;
+					garoonCalendarStr = "組織";
+					break;
+
+				case "user":
+					garoonCalendarType = MemberType.USER;
+					garoonCalendarStr = "ユーザ";
+					break;
+
+				default:
+					LOGGER.error("不明なカレンダーの種別" + ggsyncProperties.getGaroonCalendarType());
+					System.exit(1);
+			}
 
 			LOGGER.debug("グーグルカレンダーの認証方式: " + googleAuthType);
 			LOGGER.debug("サービスアカウントのメールアドレス: " + googleOauthMail);
@@ -123,6 +147,9 @@ public class GGsync {
 			LOGGER.debug("ガルーンのURL: " + garoonUrl);
 			LOGGER.debug("ガルーンのアカウント: " + garoonAccount);
 			//LOGGER.debug("ガルーンのパスワード: " + garoonPassword);
+			LOGGER.debug("ガルーンのカレンダー種別: " + garoonCalendarStr);
+			LOGGER.debug("ガルーンのカレンダーID: " + garoonCalendarId);
+
 			LOGGER.debug("SYNC対象の開始時間: " + syncStartDate);
 			LOGGER.debug("SYNC対象の終了時間: " + syncEndDate);
 
@@ -175,7 +202,18 @@ public class GGsync {
 			scheduleGetEvents.setStartForDaily(syncStartDateUtc);
 			scheduleGetEvents.setEnd(syncEndDateUtc);
 			scheduleGetEvents.setEndForDaily(syncEndDateUtc);
-			scheduleGetEvents.setMember(MemberType.USER, garoonUid);
+
+			if (garoonCalendarId < 0 && garoonCalendarType == MemberType.USER) {
+				garoonCalendarId = garoonUid;
+				LOGGER.info("カレンダーID: " + Integer.toString(garoonCalendarId) + " (自動)");
+			}
+
+			if (garoonCalendarId < 0) {
+				LOGGER.error("カレンダーIDが指定されていません");
+                System.exit(1);
+			}
+			scheduleGetEvents.setMember(garoonCalendarType, garoonCalendarId);
+
 
 			OMElement scheduleEvents = cbClient.sendReceive(scheduleGetEvents);
 			List<com.cybozu.garoon3.schedule.Event> garoonSchedules = ScheduleUtil.getEventList(scheduleEvents, apiVersion);

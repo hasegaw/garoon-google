@@ -18,6 +18,8 @@ public class GGsyncProperties {
 	private String GOOGLE_OAUTH_CREDENTIAL_FILE, GOOGLE_OAUTH_STORE_DIR;
 	private String GOOGLE_CALENDAR_NORMAL_COLOR, GOOGLE_CALENDAR_BANNER_COLOR;
 	private String GAROON_URL, GAROON_ACCOUNT, GAROON_PASSWORD;
+	private int GAROON_CALENDAR_ID;
+	private String GAROON_CALENDAR_TYPE;
 	private String EXECUTION_LEVEL;
 	private Date SYNC_START_DATE, SYNC_END_DATE;
 	private Date SYNC_START_DATE_UTC, SYNC_END_DATE_UTC;
@@ -46,6 +48,8 @@ public class GGsyncProperties {
 			this.GAROON_URL = prop.getProperty("garoon.url").trim();
 			this.GAROON_ACCOUNT = prop.getProperty("garoon.account").trim();
 			this.GAROON_PASSWORD = prop.getProperty("garoon.password").trim();
+			this.GAROON_CALENDAR_ID = Integer.parseInt(prop.getProperty("garoon.calendar.id", "-1").trim());
+			this.GAROON_CALENDAR_TYPE = prop.getProperty("garoon.calendar.type", "user").trim();
 
 			long syncBeforeDays = Long.parseLong(prop.getProperty("sync.before.days", "1").trim());
 			long syncAfterDays = Long.parseLong(prop.getProperty("sync.after.days", "7").trim());
@@ -110,6 +114,14 @@ public class GGsyncProperties {
 
 	public String getGaroonPassword() {
 		return this.GAROON_PASSWORD;
+	}
+
+	public String getGaroonCalendarType() {
+		return this.GAROON_CALENDAR_TYPE;
+	}
+
+	public int getGaroonCalendarId() {
+		return this.GAROON_CALENDAR_ID;
 	}
 
 	public Date getSyncStartDate() {
